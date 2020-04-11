@@ -1,0 +1,14 @@
+{
+    "env": {
+        "es6": true,
+        "node": true
+    },
+    "extends": "eslint:recommended",
+    "rules": {
+        "eol-last": "error",
+        "no-multiple-empty-lines": ["error", { "max": 1 }],
+        "quote-props": "error",
+        "quotes": ["error"],
+        "semi": "error"
+    }
+}
