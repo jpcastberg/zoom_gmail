@@ -1,0 +1,9 @@
+{
+  "name": "zoom_gmail",
+  "version": "1.0.0",
+  "description": "An automater for Zoom password changes, and notifications to a mailing list through Gmail.",
+  "main": "index.js",
+  "scripts": {},
+  "author": "John Castberg",
+  "license": "ISC"
+}
