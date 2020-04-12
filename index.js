@@ -1,29 +1,21 @@
-const configuration = require("./configuration");
-const { endpoints, credentials } = configuration;
-const zoomApi = endpoints.zoomApi;
+const { gmail, zoom } = require("./library");
+const { configurations } = require("./configurations");
 
-const newPassword = generatePassword();
+const newPassword = zoom.generatePassword();
 
-updateZoomMeeting({
+zoom.updateZoomMeeting({
     "password": newPassword
-}, credentials.zoom.meetingId)
-    .then();
+})
+    .then(() => gmail.getEmailAddresses(configurations.gmail.contactGroup))
+    .then((emailAddresses) => gmail.sendEmail({
+        "bcc": emailAddresses,
+        "subject": configurations.gmail.emailSubject,
+        "message": configurations.gmail.getMessage(newPassword, "2am")
+    }))
+    .then((info) => {
+        debugger;
+    })
+    .catch((error) => {
+        debugger;
+    });
 
-function updateZoomMeeting(newData, meetingId) {
-    return zoomApi.patch("/meetings/" + meetingId, newData);
-    
-}
-
-function generatePassword() {
-    let password = "";
-
-    while (password.length < 6) {
-        password += getRandomSingleDigitInt();
-    }
-
-    return password;
-
-    function getRandomSingleDigitInt() {
-        return Math.floor(Math.random() * (9 - 0 + 1)) + 0;
-    }
-}
