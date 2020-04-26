@@ -6,9 +6,18 @@
     "extends": "eslint:recommended",
     "rules": {
         "eol-last": "error",
+        "func-style": ["error", "declaration"],
+        "indent": ["error", {
+            "SwitchCase": 1
+        }],
         "no-multiple-empty-lines": ["error", { "max": 1 }],
         "quote-props": "error",
         "quotes": ["error"],
-        "semi": "error"
+        "semi": "error",
+        "space-before-function-paren": ["error", {
+            "anonymous": "always",
+            "named": "never",
+            "asyncArrow": "always"
+        }]
     }
 }

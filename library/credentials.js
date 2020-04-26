@@ -1,6 +1,14 @@
 const fs = require("fs");
 const { "google": googleApis } = require("googleapis");
+const xoauth2 = require("xoauth2");
 const { credentials } = require("../configurations");
+
+const xoauth2Generator = xoauth2.createXOAuth2Generator({
+    "user": credentials.gmail.user,
+    "clientId": credentials.gmail.client_id,
+    "clientSecret": credentials.gmail.client_secret,
+    "refreshToken": credentials.gmail.refresh_token
+});
 
 function updateCredentials(newCredentials) {
     return new Promise((resolve, reject) => {
@@ -29,8 +37,10 @@ function getOauth2Provider(credentials) {
     newOauth2Provider.setCredentials(credentials.tokens);
     
     newOauth2Provider.on("tokens", (tokens) => {
+        const ttlInSeconds = Math.round((tokens.expiry_date - new Date().getTime()) / 1000);
         if (tokens.refresh_token) {
             newOauth2Provider.setCredentials(tokens);
+            xoauth2Generator.updateToken(tokens, ttlInSeconds);
             credentials.gmail.tokens = tokens;
             updateCredentials(credentials)
                 .catch((error) => {
@@ -43,5 +53,6 @@ function getOauth2Provider(credentials) {
 }
 
 module.exports = {
-    "oauth2Provider": getOauth2Provider(credentials.gmail)
+    "oauth2Provider": getOauth2Provider(credentials.gmail),
+    "xoauth2Generator": xoauth2Generator
 };
