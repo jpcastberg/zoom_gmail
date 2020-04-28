@@ -2,15 +2,19 @@ const { gmail, zoom, mongodb } = require("./library");
 const { configurations } = require("./configurations");
 
 const dbConnection = mongodb.connection;
-const newPassword = zoom.generatePassword();
+const zoomPassword = zoom.generatePassword();
+const dryRun = true;
 
 resolveOnDbConnectionOpen()
     .then(() => {
-        // return zoom.updateZoomMeeting({
-        //     "password": newPassword
-        // });
+        if (dryRun) {
+            return new Promise((resolve) => resolve());
+        }
 
-        return new Promise((resolve) => resolve());
+        return zoom.updateZoomMeeting({
+            "password": zoomPassword
+        });
+
     })
     .then(() => {
         return gmail.getEmailListAddresses(configurations.gmail.contactGroup);
@@ -18,8 +22,9 @@ resolveOnDbConnectionOpen()
     .then((emailAddresses) => {
         return gmail.sendEmail({
             "isMailingList": true,
-            "zoomPassword": newPassword,
+            "zoomPassword": zoomPassword,
             "bcc": emailAddresses,
+            "dryRun": dryRun
         })
         .then(() => {
             return emailAddresses;
@@ -36,7 +41,7 @@ resolveOnDbConnectionOpen()
         console.log(error)
     });
 
-function autoRespondForNMinutes(minutes) {
+function autoRespondForNMinutes(minutes = 80) {
     const now = new Date()
     const calculatedMinutes = minutes * 60 * 1000;
     const endTime = new Date(now.getTime() + calculatedMinutes);
@@ -45,12 +50,14 @@ function autoRespondForNMinutes(minutes) {
         respondToUnhandledEmails();
 
         function respondToUnhandledEmails() {
+            console.log("respondToUnhandledEmails triggered");
             getHandledEmails()
                 .then((handledEmails) => {
                     return gmail.getTodaysEmailAddresses()
                          .then((todaysEmailAddresses) => {
                             const unhandledEmails = todaysEmailAddresses.filter((emailAddress) => {
-                                return handledEmails.indexOf(emailAddress) === -1;
+                                const extractedEmailAddress = extractEmailAddress(emailAddress);
+                                return handledEmails.indexOf(extractedEmailAddress) > 0;
                             });
         
                             return unhandledEmails;
@@ -63,8 +70,9 @@ function autoRespondForNMinutes(minutes) {
 
                     return gmail.sendEmail({
                         "isMailingList": false,
-                        "zoomPassword": newPassword,
+                        "zoomPassword": zoomPassword,
                         "bcc": unhandledEmails,
+                        "dryRun": dryRun
                     })
                     .then(() => {
                         return unhandledEmails;
@@ -77,7 +85,7 @@ function autoRespondForNMinutes(minutes) {
                         return;
                     }
 
-                    setTimeout(respondToUnhandledEmails, 30 * 1000);
+                    setTimeout(respondToUnhandledEmails, 10 * 1000);
                 });
         }
 
@@ -90,15 +98,20 @@ function autoRespondForNMinutes(minutes) {
 function formatEmailAddressesForSave(emailAddresses = []) {
     return emailAddresses.map((emailAddress) => {
         const dateString = new Date().toDateString();
+        const extractedEmailAddress = extractEmailAddress(emailAddress);
         return {
-            "key": dateString + emailAddress,
-            "emailAddress": emailAddress,
+            "key": dateString + extractedEmailAddress,
+            "emailAddress": extractedEmailAddress,
             "dateSent": dateString
         }
     });
 }
 
-function saveEmailAdressesToDb(emailAddresses) {
+function extractEmailAddress(emailAddress = "") {
+    return emailAddress.replace(/^.*<(.+)>.*$/g, "$1")
+}
+
+function saveEmailAdressesToDb(emailAddresses = []) {
     const sentEmails = formatEmailAddressesForSave(emailAddresses);
 
     return mongodb.saveMany(sentEmails);

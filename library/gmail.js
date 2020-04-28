@@ -42,7 +42,11 @@ function getTodaysEmailAddresses() {
             return getTodaysEmailUids();
         })
         .then((uids) => {
-            return fetchTodaysEmailAddresses(uids);
+            if (uids.length) {
+                return fetchTodaysEmailAddresses(uids);
+            }
+
+            return [];
         })
         .then((emailAddresses) => {
             return emailAddresses;
@@ -137,12 +141,17 @@ function sendEmail(options) {
         }
     };
 
-    return new Promise((resolve) => {
-        console.log("sendEmail would send message: " + JSON.stringify(msg, null, 4));
+    if (options.dryRun) {
+        console.log("dry run worked")
+        return new Promise((resolve) => {
+            console.log("sendEmail would send message: " + JSON.stringify(msg, null, 4));
+    
+            resolve();
+        })
+    }
 
-        resolve();
-    })
 
+    console.log("dry run didnt work")
     // console.log("sending test email")
     // return sgMail.send(msg);
 }

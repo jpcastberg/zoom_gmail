@@ -1,4 +1,4 @@
-const ZOOM_MEETING_ID = "776206300";
+const ZOOM_MEETING_ID = "229464399";
 const EMAIL_HEADINGS = {
     "sunday": "Sunday - Experience, Strength, and Hope",
     "monday": "Monday - Meditation",
@@ -14,7 +14,7 @@ module.exports = {
         "meetingId": ZOOM_MEETING_ID
     },
     "gmail": {
-        "contactGroup": "46030860b726dd1",
+        "contactGroup": "421324f8d4c813b",
     },
     "template": {
         "previewText": "We are looking forward to seeing you!",
