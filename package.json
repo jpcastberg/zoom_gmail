@@ -14,7 +14,7 @@
     "jsonwebtoken": "^8.5.1",
     "mongoose": "^5.9.10",
     "nodemailer": "^6.4.6",
-    "underscore": "^1.10.2",
+    "underscore": "^1.12.1",
     "xoauth2": "^1.2.0"
   },
   "devDependencies": {
